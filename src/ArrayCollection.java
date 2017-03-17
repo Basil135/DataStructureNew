@@ -1,13 +1,13 @@
-import java.lang.reflect.Array;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class ArrayCollection<E> implements Collection<E> {
+public class ArrayCollection<T> implements Collection<T> {
 
-    private E[] dataArray = (E[])new Object[1];
+    public T[] array = (T[])new Object[1];
 
-    private int size = 0;
+    private int size;
 
     @Override
     public int size() {
@@ -20,130 +20,167 @@ public class ArrayCollection<E> implements Collection<E> {
     }
 
     @Override
-    public boolean contains(final Object o) {
+    public boolean contains(Object o) {
 
-        if (o == null)
+        if (array == null || o == null)
             throw new NullPointerException();
 
-        if (!(o instanceof E))
-            throw new ClassCastException();
+        boolean result = false;
 
+        Iterator<T> iterator = iterator();
 
-        for (int count = 0; count < size; count++) {
+        while (iterator.hasNext()) {
 
-            if (dataArray[count].equals(o))
-                return true;
+            if (iterator.next().equals(o))
+                result = true;
 
         }
 
-        return false;
+        return result;
 
     }
 
     @Override
-    public Iterator iterator() {
-        return new arrayIterator();
+    public Iterator<T> iterator() {
+        return new ArrayIterator();
     }
 
     @Override
     public Object[] toArray() {
-        return dataArray;
+        return array;
     }
 
     @Override
-    public <T> T[] toArray(final T[] a) {
+    public <T1> T1[] toArray(T1[] a) {
 
-        if (a == null)
+        T1[] result = (T1[])new Object[a.length];
+
+        if (array == null)
             throw new NullPointerException();
 
-        for (int count = 0; count < size; count++) {
+        if (a.length >= size()) {
 
-            if (a.getClass().isInstance(dataArray[count]))
-                throw  new ArrayStoreException();
+            System.arraycopy(array, 0, a, 0, size());
 
-        }
-
-        if (a.length >= size) {
-
-            System.arraycopy(dataArray, 0, a, 0, size - 1);
-
-            if (a.length > size)
-                a[size] = null;
-
-            return a;
+            System.arraycopy(a, 0, result, 0, a.length);
 
         } else {
 
-            T[] newA = (T[]) Array.newInstance(a.getClass().getComponentType(), size);
+            result = (T1[]) new Object[size() + 1];
 
-            System.arraycopy(dataArray, 0, newA, 0, size);
+            System.arraycopy(array, 0, result, 0, size());
 
-            return newA;
+            result[size()] = null;
 
         }
 
+        return result;
+
     }
 
     @Override
-    public boolean add(final E e) {
+    public boolean add(T t) {
 
-       if (size < dataArray.length) {
+        if (t == null)
+            throw new NullPointerException();
 
-           dataArray[size++] = e;
+        if (size() < array.length) {
 
-       } else {
+            array[size] = t;
 
-           E[] newDataArray = (E[])new Object[size * 2];
+            size++;
 
-           System.arraycopy(dataArray, 0, newDataArray, 0, size);
+        } else {
 
-           dataArray = newDataArray;
+            array = Arrays.copyOf(array, array.length * 2);
 
-           dataArray[size++] = e;
+            array[size] = t;
 
-       }
+            size++;
+
+        }
 
         return true;
+
     }
 
     @Override
-    public boolean remove(final Object o) {
+    public boolean remove(Object o) {
 
         if (o == null)
             throw new NullPointerException();
 
-        for (int count = 0; count < size; count++) {
+        boolean result = false;
 
-            if (dataArray[count].equals(o)) {
+        int removeFlag = -1;
 
-                for (int i = count; i < size - 1; i++) {
-                    dataArray[i] = dataArray[i+1];
-                }
+        for (int count = 0; count < size(); count++) {
 
-                size--;
-
-                dataArray[size] = null;
-
-            }
+            if (array[count].equals(o))
+                removeFlag = count;
 
         }
+
+        if (removeFlag != -1) {
+
+            for (int count = removeFlag + 1; count < size(); count++)
+                array[count - 1] = array[count];
+
+            array[size() - 1] = null;
+
+            size--;
+
+            result = true;
+
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public boolean containsAll(Collection<?> c) {
+
+        boolean result = true;
+
+        for (Object item: c) {
+
+            if (!contains(item))
+                result = false;
+
+        }
+
+        return result;
+
+    }
+
+    @Override
+    public boolean addAll(Collection<? extends T> c) {
+
+        for (Object item: c)
+            add((T)item);
 
         return true;
 
     }
 
     @Override
-    public boolean addAll(Collection c) {
+    public boolean removeAll(Collection<?> c) {
 
-        for (Object item: c) {
+        for (Object item: c)
+            remove(item);
 
-            if (item == null)
-                throw new NullPointerException();
+        return true;
 
-            if (!dataArray.getClass().isInstance(item))
-                throw new IllegalStateException();
+    }
 
-            add((E)item);
+    @Override
+    public boolean retainAll(Collection<?> c) {
+
+        for (int count = 0; count < size(); count++) {
+
+            if (!c.contains(array[count]))
+                remove(array[count]);
 
         }
 
@@ -154,75 +191,38 @@ public class ArrayCollection<E> implements Collection<E> {
     @Override
     public void clear() {
 
-        for (int count = 0; count < size; count++) {
-
-            dataArray[count] = null;
-
-        }
+        for (int count = 0; count < array.length; count++)
+            array[count] = null;
 
         size = 0;
 
     }
 
-    @Override
-    public boolean retainAll(Collection c) {
+    private class ArrayIterator implements Iterator<T> {
 
-        for (int i = 0; i < size; i++) {
-
-            if (!c.contains(dataArray[i])) {
-
-                remove(dataArray[i]);
-
-            }
-
-        }
-
-        return true;
-
-    }
-
-    @Override
-    public boolean removeAll(Collection c) {
-
-        for (Object item: c) {
-
-            remove(item);
-
-        }
-
-        return true;
-    }
-
-    @Override
-    public boolean containsAll(Collection c) {
-
-        for (Object item: c) {
-
-            if (!contains(item))
-                return false;
-
-        }
-
-        return true;
-
-    }
-
-    private class arrayIterator implements Iterator {
-
-        int index;
+        private int index;
 
         @Override
         public boolean hasNext() {
+
             return index < size();
+
         }
 
         @Override
-        public Object next() {
+        public T next() {
+
+            T result;
 
             if (!hasNext())
                 throw new NoSuchElementException();
 
-            return dataArray[index++];
+            result = array[index++];
+
+            return result;
+
         }
+
     }
+
 }
