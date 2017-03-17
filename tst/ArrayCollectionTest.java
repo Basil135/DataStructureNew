@@ -1,154 +1,352 @@
-import junit.framework.TestCase;
+import org.junit.Test;
 
-import java.util.Collection;
-import java.util.Random;
+import java.util.HashSet;
 
-public class ArrayCollectionTest extends TestCase {
+import static junit.framework.TestCase.*;
 
-    public void testSizeWhenSizeIsZero() throws Exception {
+public class ArrayCollectionTest {
+
+    @Test
+    public void sizeWhenSizeIsZero() throws Exception {
 
         ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
 
         int expectedValue = 0;
-
         int actualValue = arrayCollection.size();
-
-        assertEquals(expectedValue, actualValue);
-
-        arrayCollection.add(5);
-        arrayCollection.add(5);
-        arrayCollection.add(6);
-
-        arrayCollection.remove(5);
-        arrayCollection.remove(6);
-        arrayCollection.remove(5);
 
         assertEquals(expectedValue, actualValue);
 
     }
 
-    public void testSizeWhenSizeIsNotZero() throws Exception {
+    @Test
+    public void sizeWhenSizeIsNonZero() throws Exception {
 
         ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
 
+        arrayCollection.add(2);
+        arrayCollection.add(2);
+        arrayCollection.add(2);
+
         int expectedValue = 3;
-
-        arrayCollection.add(5);
-        arrayCollection.add(5);
-        arrayCollection.add(6);
-
         int actualValue = arrayCollection.size();
-
-        assertEquals(expectedValue, actualValue);
-
-        ArrayCollection<Integer> arrayCollection1 = new ArrayCollection<>();
-
-        for (int i = 0; i < 1000; i++) {
-            arrayCollection1.add(i);
-        }
-
-        expectedValue = 1000;
-
-        actualValue = arrayCollection1.size();
 
         assertEquals(expectedValue, actualValue);
 
     }
 
-    public void testIsEmpty() throws Exception {
+    @Test
+    public void isEmptyWhenEmpty() throws Exception {
 
         ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
 
         boolean expectedValue = true;
-
         boolean actualValue = arrayCollection.isEmpty();
 
         assertEquals(expectedValue, actualValue);
-        assertTrue(actualValue);
-
-        arrayCollection.add(5);
-
-        actualValue = arrayCollection.isEmpty();
-
-        assertFalse(actualValue);
-
-        arrayCollection.remove(5);
-
-        actualValue = arrayCollection.isEmpty();
-
-        assertEquals(expectedValue, actualValue);
-        assertTrue(actualValue);
+        assertTrue(arrayCollection.isEmpty());
+        assertFalse(!arrayCollection.isEmpty());
 
     }
 
-    public void testContains() throws Exception {
+    @Test
+    public void isEmptyWhenNonEmpty() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(2);
+        arrayCollection.add(2);
+        arrayCollection.add(2);
+
+        boolean expectedValue = false;
+        boolean actualValue = arrayCollection.isEmpty();
+
+        assertEquals(expectedValue, actualValue);
+        assertTrue(!arrayCollection.isEmpty());
+        assertFalse(arrayCollection.isEmpty());
+
+    }
+
+    @Test
+    public void containsWhenArrayIsEmpty() throws Exception {
 
         ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
 
         boolean expectedValue = false;
+        boolean actualValue = arrayCollection.contains(2);
 
-        boolean actualValue = arrayCollection.contains(7);
-
-        assertFalse(actualValue);
         assertEquals(expectedValue, actualValue);
+        assertTrue(!arrayCollection.contains(2));
+        assertFalse(arrayCollection.contains(2));
 
-        expectedValue = true;
+    }
 
+    @Test
+    public void containsWhenNoContains() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(1);
+        arrayCollection.add(3);
+        arrayCollection.add(4);
+
+        boolean expectedValue = false;
+        boolean actualValue = arrayCollection.contains(2);
+
+        assertEquals(expectedValue, actualValue);
+        assertTrue(!arrayCollection.contains(2));
+        assertFalse(arrayCollection.contains(2));
+
+    }
+
+    @Test
+    public void containsWhenContains() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(1);
+        arrayCollection.add(2);
+        arrayCollection.add(3);
+        arrayCollection.add(4);
+
+        boolean expectedValue = true;
+        boolean actualValue = arrayCollection.contains(2);
+
+        assertEquals(expectedValue, actualValue);
+        assertTrue(arrayCollection.contains(2));
+        assertFalse(!arrayCollection.contains(2));
+
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void containsWhenNullPointerException() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(1);
+        arrayCollection.add(3);
+        arrayCollection.add(4);
+
+        arrayCollection.contains(null);
+
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void toArrayException() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+        Integer[] a = null;
+
+        arrayCollection.toArray(a);
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void addWhenException() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(null);
+
+    }
+
+    @Test(expected = NullPointerException.class)
+    public void removeException() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        Integer a = null;
+
+        arrayCollection.remove(a);
+
+    }
+
+    @Test
+    public void removeWhenIsExist() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(2);
         arrayCollection.add(5);
+        arrayCollection.add(7);
+        arrayCollection.add(9);
 
-        actualValue = arrayCollection.contains(5);
+        arrayCollection.remove(7);
 
-        assertTrue(actualValue);
-        assertEquals(expectedValue, actualValue);
+        assertFalse(arrayCollection.contains(7));
+
+    }
+
+    @Test
+    public void removeWhenNonExist() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        arrayCollection.add(1);
+        arrayCollection.add(2);
+        arrayCollection.add(3);
+
+        assertFalse(arrayCollection.remove(4));
+
+    }
+
+    @Test
+    public void removeFromEmptyCollection() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        assertFalse(arrayCollection.remove(3));
+
+    }
+
+    @Test
+    public void containsAll() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        HashSet<Integer> integerHashSet = new HashSet<>();
+
+        boolean expectedValue;
+        boolean actualValue;
+
+        integerHashSet.add(1);
+        integerHashSet.add(2);
+        integerHashSet.add(3);
+
+        arrayCollection.add(4);
+        arrayCollection.add(1);
+        arrayCollection.add(3);
 
         expectedValue = false;
+        actualValue = arrayCollection.containsAll(integerHashSet);
 
-        arrayCollection.remove(5);
+        assertFalse(arrayCollection.containsAll(integerHashSet));
+        assertTrue(!arrayCollection.containsAll(integerHashSet));
+        assertEquals(expectedValue, actualValue);
 
-        actualValue = arrayCollection.contains(5);
+        arrayCollection.add(7);
+        arrayCollection.add(2);
 
-        assertFalse(actualValue);
+        expectedValue = true;
+        actualValue = arrayCollection.containsAll(integerHashSet);
+
+        assertFalse(!arrayCollection.containsAll(integerHashSet));
+        assertTrue(arrayCollection.containsAll(integerHashSet));
         assertEquals(expectedValue, actualValue);
 
     }
 
-    public void testIterator() throws Exception {
+    @Test
+    public void addAll() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        HashSet<Integer> integerHashSet = new HashSet<>();
+
+        integerHashSet.add(1);
+        integerHashSet.add(2);
+        integerHashSet.add(3);
+
+        arrayCollection.add(4);
+        arrayCollection.add(1);
+        arrayCollection.add(3);
+
+        arrayCollection.addAll(integerHashSet);
+
+        assertTrue(arrayCollection.containsAll(integerHashSet));
 
     }
 
-    public void testToArray() throws Exception {
+    @Test
+    public void removeAll() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        HashSet<Integer> integerHashSet = new HashSet<>();
+
+        int expectedValueOne;
+        int actualValueOne;
+
+        boolean expectedValueTwo;
+        boolean actualValueTwo;
+
+        integerHashSet.add(1);
+        integerHashSet.add(2);
+        integerHashSet.add(3);
+
+        arrayCollection.add(4);
+        arrayCollection.add(1);
+        arrayCollection.add(3);
+
+        arrayCollection.removeAll(integerHashSet);
+
+        expectedValueOne = 1;
+        actualValueOne = arrayCollection.size();
+
+        expectedValueTwo = true;
+        actualValueTwo = arrayCollection.contains(4);
+
+        assertEquals(expectedValueOne, actualValueOne);
+        assertEquals(expectedValueTwo, actualValueTwo);
 
     }
 
-    public void testToArray1() throws Exception {
+    @Test
+    public void retainAll() throws Exception {
+
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
+
+        HashSet<Integer> integerHashSet = new HashSet<>();
+
+        int expectedValueOne;
+        int actualValueOne;
+
+        boolean expectedValueTwo;
+        boolean actualValueTwo;
+
+        integerHashSet.add(1);
+        integerHashSet.add(2);
+        integerHashSet.add(3);
+
+        arrayCollection.add(4);
+        arrayCollection.add(1);
+        arrayCollection.add(3);
+
+        arrayCollection.retainAll(integerHashSet);
+
+        expectedValueOne = 2;
+        actualValueOne = arrayCollection.size();
+
+        expectedValueTwo = false;
+        actualValueTwo = arrayCollection.contains(4);
+
+        assertEquals(expectedValueOne, actualValueOne);
+        assertEquals(expectedValueTwo, actualValueTwo);
 
     }
 
-    public void testAdd() throws Exception {
+    @Test
+    public void clear() throws Exception {
 
-    }
+        ArrayCollection<Integer> arrayCollection = new ArrayCollection<>();
 
-    public void testRemove() throws Exception {
+        int expectedValue;
+        int actualValue;
 
-    }
+        arrayCollection.add(2);
+        arrayCollection.add(3);
+        arrayCollection.add(2);
+        arrayCollection.add(3);
 
-    public void testAddAll() throws Exception {
+        expectedValue = 4;
+        actualValue = arrayCollection.size();
 
-    }
+        assertEquals(expectedValue, actualValue);
 
-    public void testClear() throws Exception {
+        arrayCollection.clear();
 
-    }
+        expectedValue = 0;
+        actualValue = arrayCollection.size();
 
-    public void testRetainAll() throws Exception {
-
-    }
-
-    public void testRemoveAll() throws Exception {
-
-    }
-
-    public void testContainsAll() throws Exception {
+        assertEquals(expectedValue, actualValue);
 
     }
 
